@@ -14,6 +14,24 @@ const ClientDashboard = () => {
     const [activeTab, setActiveTab] = useState('overview');
     const [chatPartner, setChatPartner] = useState(null);
 
+    // Calculate project progress based on the most recent project's status
+    const projectProgress = React.useMemo(() => {
+        if (!projects || projects.length === 0) return 0;
+        // Assuming the first project is the most relevant/recent one
+        const currentProject = projects[0];
+
+        const statusMap = {
+            'SUBMITTED': 10,
+            'PENDING': 15,
+            'REVIEWING': 25,
+            'APPROVED': 40,
+            'IN_PROGRESS': 65,
+            'COMPLETED': 100
+        };
+
+        return statusMap[currentProject.status] || 5;
+    }, [projects]);
+
     const fetchProjects = async () => {
         try {
             const data = await ProjectService.getMyProjects();
@@ -84,9 +102,16 @@ const ClientDashboard = () => {
                                         <p className="text-4xl font-black">{projects.length}</p>
                                     </div>
                                     <div className="bg-white dark:bg-slate-900 border border-slate-100 dark:border-slate-800 p-8 rounded-3xl shadow-lg">
-                                        <h4 className="text-xl font-bold mb-2 text-slate-900 dark:text-white">Profile Strength</h4>
+                                        <h4 className="text-xl font-bold mb-2 text-slate-900 dark:text-white">Project Progress</h4>
+                                        <div className="flex items-end gap-2 mb-2">
+                                            <span className="text-4xl font-black text-primary">{projectProgress}%</span>
+                                            <span className="text-sm text-slate-500 mb-1">completed</span>
+                                        </div>
                                         <div className="w-full bg-slate-100 dark:bg-slate-800 h-3 rounded-full overflow-hidden">
-                                            <div className="w-3/4 bg-primary h-full"></div>
+                                            <div
+                                                className="bg-primary h-full transition-all duration-1000 ease-out"
+                                                style={{ width: `${projectProgress}%` }}
+                                            ></div>
                                         </div>
                                     </div>
                                 </div>
